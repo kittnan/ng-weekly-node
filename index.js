@@ -28,6 +28,9 @@ app.use("/ng-ref", NG_REF);
 let GROUP_TARGET = require("./src/routes/group-target");
 app.use("/group-target", GROUP_TARGET);
 
+let CALCULATE = require("./src/routes/calculate");
+app.use("/calculate", CALCULATE);
+
 
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");

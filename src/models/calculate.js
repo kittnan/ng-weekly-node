@@ -3,11 +3,11 @@ const Schema = mongoose.Schema;
 
 const model = new Schema(
   {
-    model:String
+    
   },
   { timestamps: true, versionKey: false, strict: false }
 );
 
-const UserModule = mongoose.model("groupTarget", model);
+const UserModule = mongoose.model("calculate", model);
 
 module.exports = UserModule;
