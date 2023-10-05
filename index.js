@@ -31,6 +31,9 @@ app.use("/group-target", GROUP_TARGET);
 let CALCULATE = require("./src/routes/calculate");
 app.use("/calculate", CALCULATE);
 
+let CALENDAR = require("./src/routes/calendar");
+app.use("/calendar", CALENDAR);
+
 
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");

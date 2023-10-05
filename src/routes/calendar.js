@@ -3,13 +3,13 @@ let router = express.Router();
 const apicache = require("apicache-plus");
 let cache = apicache.middleware
 let XLSX = require("xlsx");
-const GROUP_TARGET = require("../models/group-target");
-const cacheStr = "groupTarget";
+const CALENDAR = require("../models/calendar");
+const cacheStr = "calendar";
 
 router.get("/", apicache.middleware("10 minutes"),async (req, res, next) => {
   try {
     req.apicacheGroup  = cacheStr
-    const usersQuery = await GROUP_TARGET.aggregate([{$match:{}}])
+    const usersQuery = await CALENDAR.aggregate([{$match:{}}])
     res.json(usersQuery);
   } catch (error) {
     res.sendStatus(500);
@@ -19,7 +19,7 @@ router.get("/", apicache.middleware("10 minutes"),async (req, res, next) => {
 router.get("/download", async (req, res, next) => {
   try {
     
-    const data = await GROUP_TARGET.aggregate([
+    const data = await CALENDAR.aggregate([
       {
         $match: {
           
@@ -47,9 +47,9 @@ router.get("/download", async (req, res, next) => {
 router.post("/create", async (req, res, next) => {
   try {
     apicache.clear(cacheStr)
-    const statusDelete = await GROUP_TARGET.deleteMany({})
+    const statusDelete = await CALENDAR.deleteMany({})
     console.log("delete group target", statusDelete)
-    const usersQuery = await GROUP_TARGET.insertMany(req.body)
+    const usersQuery = await CALENDAR.insertMany(req.body)
     console.log('create group target ->',usersQuery.length);
     res.json(usersQuery);
   } catch (error) {

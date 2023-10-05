@@ -4,10 +4,11 @@ const apicache = require("apicache-plus");
 let cache = apicache.middleware;
 let XLSX = require("xlsx");
 const NG_REF = require("../models/ngRef");
+const cacheStr = "ngRef";
 
 router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
   try {
-    req.apicacheGroup  = "ngRef"
+    req.apicacheGroup  = cacheStr
     const usersQuery = await NG_REF.aggregate([{ $match: {} }]);
     res.json(usersQuery);
   } catch (error) {
@@ -57,7 +58,7 @@ router.get("/download", async (req, res, next) => {
 });
 router.post("/create", async (req, res, next) => {
   try {
-    apicache.clear("ngRef");
+    apicache.clear(cacheStr);
     const statusDelete = await NG_REF.deleteMany({});
     console.log("delete NG ref", statusDelete);
     const usersQuery = await NG_REF.insertMany(req.body);
