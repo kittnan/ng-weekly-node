@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
     let groupTargetAll = await GROUP_TARGET.aggregate([
       {
         $match: {
-          groupName: null,
+          // groupName: null,
         },
       },
     ]);
