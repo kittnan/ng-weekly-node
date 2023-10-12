@@ -9,13 +9,12 @@ mongoose.set("strictQuery", false);
 const dotenv = require("dotenv");
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-console.log(process.env.PORT);
+console.log("PORT:", process.env.PORT);
 let mongooseConnect = require("./connect");
-const port = process.env.PORT ;
+const port = process.env.PORT;
 const server = app.listen(port, () => {
   console.log("Listening on  port " + server.address().port);
 });
-
 
 app.use(morgan("tiny"));
 app.use(bodyParser.json({ limit: "5mb" }));
@@ -32,16 +31,17 @@ let CALCULATE = require("./src/routes/calculate");
 app.use("/calculate", CALCULATE);
 
 let CALENDAR = require("./src/routes/calendar");
-app.use("/calendar", CALENDAR);
 
+let d = require("./src/routes/cal");
+app.use("/d", d);
+
+let CHART = require("./src/routes/chart");
+app.use("/chart", CHART);
 
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST ,PUT ,DELETE");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-with,Content-Type"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-with,Content-Type");
   res.setHeader("Access-Control-Allow-Credentials", true);
   next();
 });

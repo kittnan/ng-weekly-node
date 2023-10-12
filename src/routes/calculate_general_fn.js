@@ -5,13 +5,16 @@ module.exports = {
     }, 0);
   },
   calProcessCause(data) {
-    return data["X"] / 2 + data["P"];
+    let foo = data["X"] / 2 + data["P"];
+    return foo ? foo : 0;
   },
   calArrayCause(data) {
-    return data["X"] / 2 + data["A"];
+    let foo = data["X"] / 2 + data["A"];
+    return foo ? foo : 0;
   },
 
   calPercentInput(input, value) {
-    return value / input;
+    let foo = value / input;
+    return foo ? foo : 0;
   },
 };

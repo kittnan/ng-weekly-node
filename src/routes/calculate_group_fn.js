@@ -6,7 +6,7 @@ const NG_REF = require("../models/ngRef");
 const moment = require("moment/moment");
 const cacheStr = "calculate";
 
-const $cal_general = require('./calculate_general_fn')
+const $cal_general = require("./calculate_general_fn");
 
 module.exports = {
   async calculate(ngRef, haveGroup) {
@@ -93,6 +93,7 @@ module.exports = {
           p["M"] += result["M"];
           p["X"] += result["X"];
           p["Pola"] += result["Pola"];
+
           return p;
         },
         {
@@ -100,6 +101,7 @@ module.exports = {
           A: 0,
           M: 0,
           X: 0,
+          Pola: 0,
         }
       );
       return {
@@ -107,7 +109,30 @@ module.exports = {
         ...obj,
       };
     });
-    return calResultGroup
-  },
+    calResultGroup = calResultGroup.map((d1) => {
+      const ST_Yield = d1["Output"] / d1["Input"];
+      const TTL_Yield = (d1["Output"] + d1["Rework"]) / d1["Input"];
+      const processCase = (d1["P"] + d1["X"]) / 2 / d1["Input"];
+      const processCasePercent = $cal_general.calPercentInput(d1["Input"], processCase);
+      const arrayCause = (d1["A"] + d1["X"]) / 2 / d1["Input"];
+      const arrayCausePercent = $cal_general.calPercentInput(d1["Input"], arrayCause);
+      const materialCause = d1["M"] / d1["Input"];
+      const materialCausePercent = $cal_general.calPercentInput(d1["Input"], materialCause);
+      const polarPercent = $cal_general.calPercentInput(d1["Input"], d1["Pola"]);
+      return {
+        ...d1,
+        "ST Yield": ST_Yield,
+        "TTL Yield": TTL_Yield,
+        ProcessCause: processCase,
+        ProcessCausePercent: processCasePercent,
+        ArrayCause: arrayCause,
+        ArrayCausePercent: arrayCausePercent,
+        MaterialCause: materialCause,
+        MaterialCausePercent: materialCausePercent,
+        PolaPercent: polarPercent,
+      };
+    });
 
+    return calResultGroup;
+  },
 };

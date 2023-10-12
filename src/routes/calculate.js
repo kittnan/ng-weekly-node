@@ -23,6 +23,96 @@ router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
     res.sendStatus(500);
   }
 });
+router.get("/group", apicache.middleware("10 minutes"), async (req, res, next) => {
+  try {
+    req.apicacheGroup = cacheStr;
+    const usersQuery = await CALCULATE.aggregate([
+      { $match: {} },
+      {
+        $unset: "calResultNoGroup",
+      },
+      {
+        $unwind: "$calResultGroup",
+      },
+      // {
+      //   $unwind: "$calResultGroup.data",
+      // },
+      // {
+      //   $unset: "calResultGroup.data",
+      // },
+      // {
+      //   $project: {
+      //     date: "$date",
+      //     CW: "$CW",
+      //     calResultGroup: "$calResultGroup",
+      //     month: "$month",
+      //   },
+      // },
+      {
+        $replaceRoot: { newRoot: { $mergeObjects: ["$calResultGroup", "$$ROOT"] } },
+      },
+      {
+        $unset: "calResultGroup",
+      },
+      // {
+      //   $replaceRoot: { newRoot: { $mergeObjects: ["$data", "$$ROOT"] } },
+      // },
+      {
+        $unset: "data",
+      },
+      {
+        $replaceRoot: { newRoot: { $mergeObjects: ["$groupData", "$$ROOT"] } },
+      },
+      {
+        $unset: "groupData",
+      },
+      {
+        $unset: "yieldData",
+      },
+      // { $project: { calResultGroup: 0 } },
+    ]);
+    res.json(usersQuery);
+  } catch (error) {
+    console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
+  }
+});
+router.get("/noGroup", apicache.middleware("10 minutes"), async (req, res, next) => {
+  try {
+    req.apicacheGroup = cacheStr;
+    const usersQuery = await CALCULATE.aggregate([
+      { $match: {} },
+      {
+        $unset: "calResultGroup",
+      },
+      {
+        $unwind: "$calResultNoGroup",
+      },
+      // {
+      //   $unset: "calResultGroup.data",
+      // },
+      // {
+      //   $project: {
+      //     date: "$date",
+      //     CW: "$CW",
+      //     calResultGroup: "$calResultGroup",
+      //     month: "$month",
+      //   },
+      // },
+      {
+        $replaceRoot: { newRoot: { $mergeObjects: ["$calResultNoGroup", "$$ROOT"] } },
+      },
+      {
+        $unset: "calResultNoGroup",
+      },
+      // { $project: { calResultGroup: 0 } },
+    ]);
+    res.json(usersQuery);
+  } catch (error) {
+    console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
+  }
+});
 router.get("/lastCalWeek", async (req, res, next) => {
   try {
     const nextFriday = moment().day("Friday").startOf("day").toDate();
@@ -61,10 +151,17 @@ router.get("/lastCalWeek", async (req, res, next) => {
 });
 router.get("/calculate", async (req, res, next) => {
   try {
-    const { ngRef, haveGroup, notHaveGroup } = await $cal.calculate();
+    apicache.clear(cacheStr);
+    const { ngRef, haveGroup, notHaveGroup, weekData } = await $cal.calculate();
     const calResultGroup = await $cal_group.calculate(ngRef, haveGroup);
     const calResultNoGroup = await $cal_NoGroup.calculate(ngRef, notHaveGroup);
-    res.json({ calResultGroup: calResultGroup, calResultNoGroup: calResultNoGroup });
+    const insertCalculateData = {
+      calResultGroup: calResultGroup,
+      calResultNoGroup: calResultNoGroup,
+      ...weekData,
+    };
+    const resultInsertCal = await CALCULATE.insertMany(insertCalculateData);
+    res.json(resultInsertCal);
   } catch (error) {
     console.log("🚀 ~ error:", error);
   }
