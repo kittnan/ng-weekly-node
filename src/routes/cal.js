@@ -65,6 +65,7 @@ router.get("/", async (req, res, next) => {
 
 router.get("/d1", async (req, res, next) => {
   try {
+    const { date } = req.query;
     let groupTargetAll = await GROUP_TARGET.aggregate([
       {
         $match: {},
@@ -75,7 +76,7 @@ router.get("/d1", async (req, res, next) => {
     const yield_models = resYield_models.data;
 
     let modelsStr = JSON.stringify(models);
-    const nextFriday = moment().day("Friday");
+    const nextFriday = moment(date).day("Friday");
     const lastSaturday = moment(nextFriday).subtract(6, "day");
     let sd = moment(lastSaturday).startOf("day").format("YYYY-MM-DD");
     let ed = moment(nextFriday).endOf("day").format("YYYY-MM-DD");
@@ -121,7 +122,11 @@ router.get("/d1", async (req, res, next) => {
     weekData ? delete weekData._id : false;
     const foo = _cal_normal_fn.calculate(ngRef, dataModels, weekData);
     const foo2 = await CALCULATE.insertMany(foo);
-    res.json(foo2);
+    res.json({
+      sd: sd,
+      ed: ed,
+      data: foo,
+    });
   } catch (error) {
     console.log("🚀 ~ error:", error);
   }
