@@ -89,16 +89,18 @@ router.get("/1", async (req, res, next) => {
 
     calData2 = calData2.map((cal) => {
       const s1 = {
-        name: "Array Cause",
+        name: "Pola FM",
         type: "bar",
         stack: "stack1",
-        data: summarizeGroupCause(cal, CW, "ArrayCausePercent"),
-        color: "#bae8e8",
+        data: summarizeGroupCause(cal, CW, "PolaFMPercent"),
+        color: "#58b368",
         yAxisIndex: 1,
+
         emphasis: {
           focus: "series",
         },
       };
+
       const s2 = {
         name: "Process Cause",
         type: "bar",
@@ -111,19 +113,33 @@ router.get("/1", async (req, res, next) => {
           focus: "series",
         },
       };
+
       const s3 = {
-        name: "Pola FM",
+        name: "Array Cause",
         type: "bar",
         stack: "stack1",
-        data: summarizeGroupCause(cal, CW, "PolaFMPercent"),
-        color: "#58b368",
+        data: summarizeGroupCause(cal, CW, "ArrayCausePercent"),
+        color: "#bae8e8",
+        yAxisIndex: 1,
+        emphasis: {
+          focus: "series",
+        },
+      };
+
+      const s4 = {
+        name: "Mat Cause",
+        type: "bar",
+        stack: "stack1",
+        data: summarizeGroupCause(cal, CW, "MaterialCausePercent"),
+        color: "#3783ae",
         yAxisIndex: 1,
 
         emphasis: {
           focus: "series",
         },
       };
-      const s4 = {
+
+      const s5 = {
         name: "ST Yield",
         type: "line",
         data: summarizeGroupCause(cal, CW, "ST Yield"),
@@ -133,7 +149,7 @@ router.get("/1", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s5 = {
+      const s6 = {
         name: "Plan Yield",
         type: "line",
         data: summarizeGroupCause(cal, CW, "planYield"),
@@ -144,7 +160,7 @@ router.get("/1", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s6 = {
+      const s7 = {
         name: "Target Pola FM",
         type: "line",
         data: summarizeGroupCause(cal, CW, "targetPolaFM"),
@@ -155,19 +171,8 @@ router.get("/1", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s7 = {
-        name: "Mat Cause",
-        type: "bar",
-        stack: "stack1",
-        data: summarizeGroupCause(cal, CW, "targetPolaFM"),
-        color: "#3783ae",
-        yAxisIndex: 1,
 
-        emphasis: {
-          focus: "series",
-        },
-      };
-      let data = [s1, s2, s3, s4, s5, s7, s6];
+      let data = [s1, s2, s3, s4, s5, s6, s7];
 
       return {
         title: {
@@ -185,8 +190,8 @@ router.get("/1", async (req, res, next) => {
         xAxis: [
           {
             type: "category",
-            name: "CW",
-            data: CW,
+            name: "",
+            data: CW.map((w) => "CW" + w),
             axisPointer: {
               type: "shadow",
             },
@@ -641,17 +646,20 @@ router.get("/2", async (req, res, next) => {
       //   if (dataOnCW) console.log("🚀 ~ dataOnCW:", dataOnCW);
       //   return [dataOnCW?.ArrayCausePercent ? dataOnCW.ArrayCausePercent : 0, dataOnCW?.ProcessCausePercent ? dataOnCW.ProcessCausePercent : 0, dataOnCW?.PolaFMPercent ? dataOnCW.PolaFMPercent : 0];
       // });
+
       const s1 = {
-        name: "Array Cause",
+        name: "Pola FM",
         type: "bar",
         stack: "stack1",
-        data: summarizeNormalCause(model, calData, CW, "ArrayCausePercent"),
-        color: "#bae8e8",
+        data: summarizeNormalCause(model, calData, CW, "PolaFMPercent"),
+        color: "#58b368",
         yAxisIndex: 1,
+
         emphasis: {
           focus: "series",
         },
       };
+
       const s2 = {
         name: "Process Cause",
         type: "bar",
@@ -664,19 +672,33 @@ router.get("/2", async (req, res, next) => {
           focus: "series",
         },
       };
+
       const s3 = {
-        name: "Pola FM",
+        name: "Array Cause",
         type: "bar",
         stack: "stack1",
-        data: summarizeNormalCause(model, calData, CW, "PolaFMPercent"),
-        color: "#58b368",
+        data: summarizeNormalCause(model, calData, CW, "ArrayCausePercent"),
+        color: "#bae8e8",
+        yAxisIndex: 1,
+        emphasis: {
+          focus: "series",
+        },
+      };
+
+      const s4 = {
+        name: "Mat Cause",
+        type: "bar",
+        stack: "stack1",
+        data: summarizeNormalCause(model, calData, CW, "MaterialCausePercent"),
+        color: "#3783ae",
         yAxisIndex: 1,
 
         emphasis: {
           focus: "series",
         },
       };
-      const s4 = {
+
+      const s5 = {
         name: "ST Yield",
         type: "line",
         data: summarizeNormalCause(model, calData, CW, "ST Yield"),
@@ -686,7 +708,7 @@ router.get("/2", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s5 = {
+      const s6 = {
         name: "Plan Yield",
         type: "line",
         data: summarizeNormalCause(model, calData, CW, "planYield"),
@@ -697,7 +719,7 @@ router.get("/2", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s6 = {
+      const s7 = {
         name: "Target Pola FM",
         type: "line",
         data: summarizeNormalCause(model, calData, CW, "targetPolaFM"),
@@ -708,18 +730,7 @@ router.get("/2", async (req, res, next) => {
           focus: "series",
         },
       };
-      const s7 = {
-        name: "Mat Cause",
-        type: "bar",
-        stack: "stack1",
-        data: summarizeNormalCause(model, calData, CW, "targetPolaFM"),
-        color: "#3783ae",
-        yAxisIndex: 1,
 
-        emphasis: {
-          focus: "series",
-        },
-      };
       return {
         title: {
           show: true,
@@ -732,12 +743,12 @@ router.get("/2", async (req, res, next) => {
           padding: 20,
           itemWidth: 10,
         },
-        series: [s1, s2, s3, s4, s5, s7, s6],
+        series: [s1, s2, s3, s4, s5, s6, s7],
         xAxis: [
           {
             type: "category",
-            name: "CW",
-            data: CW,
+            name: "",
+            data: CW.map((w) => "CW" + w),
             axisPointer: {
               type: "shadow",
             },
