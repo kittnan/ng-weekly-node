@@ -129,10 +129,7 @@ router.get("/d1", async (req, res, next) => {
     weekData ? delete weekData._id : false;
     const foo = _cal_normal_fn.calculate(ngRef, dataModels, weekData);
     const foo2 = await CALCULATE.insertMany(foo);
-    res.json({
-      sd: sd,
-      ed: ed,
-    });
+    res.json(foo2);
   } catch (error) {
     console.log("🚀 ~ error:", error);
   }
