@@ -11,8 +11,8 @@ const moment = require("moment/moment");
 const cacheStr = "chart";
 const CALENDAR = require("../models/calendar");
 
-const _cal_normal_fn = require("./cal_normal_fn");
-const $cal_general = require("./calculate_general_fn");
+const _cal_normal_fn = require("../services/cal_normal_fn");
+const $cal_general = require("../services/calculate_general_fn");
 
 router.get("/1", async (req, res, next) => {
   try {
@@ -223,14 +223,15 @@ router.get("/1", async (req, res, next) => {
             axisLabel: {
               formatter: "{value} %",
             },
-            max: 120,
+            max: 100,
+            min: 60,
           },
           {
             type: "value",
             axisLabel: {
               formatter: "{value} %",
             },
-            max: 50,
+            max: 25,
           },
         ],
         tooltip: {
@@ -459,7 +460,8 @@ router.get("/2", async (req, res, next) => {
             axisLabel: {
               formatter: "{value} %",
             },
-            max: 120,
+            max: 100,
+            min: 60,
           },
           {
             type: "value",
@@ -531,6 +533,35 @@ function foo2(group, key, CW) {
     }
   });
 }
+// function summarizeGroupCause(cal, CW, key) {
+//   return CW.map((w) => {
+//     if (key == "planYield") {
+//       const dataOnCW = cal.data.find((d) => d.CW == w);
+//       const sum = dataOnCW ? dataOnCW[key] : null;
+//       return sum ? Number(sum * 100).toFixed(2) : null;
+//     } else if (key == "ST Yield") {
+//       const dataOnCW = cal.data.filter((cal) => cal.CW == w);
+//       const input = dataOnCW.reduce((p, n) => {
+//         return (p += n["Input"]);
+//       }, 0);
+//       const output = dataOnCW.reduce((p, n) => {
+//         return (p += n["Output"]);
+//       }, 0);
+//       // const sum = dataOnCW.reduce((p, n) => {
+//       //   p += n[key];
+//       //   return p;
+//       // }, 0);
+//       const sum2 = output / input;
+//       return sum2 ? Number(sum2 * 100).toFixed(2) : null;
+//     } else {
+//       const dataOnCW = cal.data.filter((cal) => cal.CW == w);
+//       const sum = dataOnCW.reduce((p, n) => {
+//         return (p += n[key]);
+//       }, 0);
+//       return sum ? Number(sum * 100).toFixed(2) : null;
+//     }
+//   });
+// }
 function summarizeGroupCause(cal, CW, key) {
   return CW.map((w) => {
     if (key == "planYield") {
@@ -551,11 +582,45 @@ function summarizeGroupCause(cal, CW, key) {
       // }, 0);
       const sum2 = output / input;
       return sum2 ? Number(sum2 * 100).toFixed(2) : null;
-    } else {
+    } else if (key == "ProcessCausePercent") {
       const dataOnCW = cal.data.filter((cal) => cal.CW == w);
-      const sum = dataOnCW.reduce((p, n) => {
-        return (p += n[key]);
+      const input = dataOnCW.reduce((p, n) => {
+        return (p += n["Input"]);
       }, 0);
+      const P = dataOnCW.reduce((p, n) => {
+        return (p += n["ProcessCause"]);
+      }, 0);
+      const sum = P / input;
+      return sum ? Number(sum * 100).toFixed(2) : null;
+    } else if (key == "PolaFMPercent") {
+      const dataOnCW = cal.data.filter((cal) => cal.CW == w);
+      const input = dataOnCW.reduce((p, n) => {
+        return (p += n["Input"]);
+      }, 0);
+      const P = dataOnCW.reduce((p, n) => {
+        return (p += n["Pola"]);
+      }, 0);
+      const sum = P / input;
+      return sum ? Number(sum * 100).toFixed(2) : null;
+    } else if (key == "ArrayCausePercent") {
+      const dataOnCW = cal.data.filter((cal) => cal.CW == w);
+      const input = dataOnCW.reduce((p, n) => {
+        return (p += n["Input"]);
+      }, 0);
+      const P = dataOnCW.reduce((p, n) => {
+        return (p += n["ArrayCause"]);
+      }, 0);
+      const sum = P / input;
+      return sum ? Number(sum * 100).toFixed(2) : null;
+    } else if (key == "MaterialCausePercent") {
+      const dataOnCW = cal.data.filter((cal) => cal.CW == w);
+      const input = dataOnCW.reduce((p, n) => {
+        return (p += n["Input"]);
+      }, 0);
+      const P = dataOnCW.reduce((p, n) => {
+        return (p += n["MaterialCause"]);
+      }, 0);
+      const sum = P / input;
       return sum ? Number(sum * 100).toFixed(2) : null;
     }
   });

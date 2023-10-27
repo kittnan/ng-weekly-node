@@ -4,6 +4,8 @@ let cors = require("cors");
 let app = express();
 let morgan = require("morgan");
 let mongoose = require("mongoose");
+let compression = require("compression");
+
 mongoose.set("strictQuery", false);
 
 const dotenv = require("dotenv");
@@ -20,6 +22,7 @@ app.use(morgan("tiny"));
 app.use(bodyParser.json({ limit: "5mb" }));
 app.use(bodyParser.urlencoded({ limit: "5mb", extended: true }));
 app.use(cors());
+app.use(compression());
 
 let NG_REF = require("./src/routes/ngRef");
 app.use("/ng-ref", NG_REF);
@@ -31,6 +34,7 @@ let CALCULATE = require("./src/routes/calculate");
 app.use("/calculate", CALCULATE);
 
 let CALENDAR = require("./src/routes/calendar");
+app.use("/calendar", CALENDAR);
 
 let d = require("./src/routes/cal");
 app.use("/d", d);

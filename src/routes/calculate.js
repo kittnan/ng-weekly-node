@@ -8,111 +8,26 @@ const CALCULATE = require("../models/calculate");
 const GROUP_TARGET = require("../models/group-target");
 const NG_REF = require("../models/ngRef");
 const moment = require("moment/moment");
+const CALENDAR = require("../models/calendar");
 const cacheStr = "calculate";
+const cacheStr2 = "chart";
 
-const $cal = require("./calculate_fn");
+const $cal = require("../services/calculate_fn");
+const _cal_normal_fn = require("../services/cal_normal_fn");
+
 // const $cal_group = require("./calculate_group_fn");
 // const $cal_NoGroup = require("./calculate_nogroup_fn");
 
 router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
   try {
     req.apicacheGroup = cacheStr;
-    const usersQuery = await CALCULATE.aggregate([{ $match: {} }]);
+    const usersQuery = await CALCULATE.aggregate([{ $match: {} }]).sort({ date: -1 });
     res.json(usersQuery);
   } catch (error) {
     res.sendStatus(500);
   }
 });
-// router.get("/group", apicache.middleware("10 minutes"), async (req, res, next) => {
-//   try {
-//     req.apicacheGroup = cacheStr;
-//     const usersQuery = await CALCULATE.aggregate([
-//       { $match: {} },
-//       {
-//         $unset: "calResultNoGroup",
-//       },
-//       {
-//         $unwind: "$calResultGroup",
-//       },
-//       // {
-//       //   $unwind: "$calResultGroup.data",
-//       // },
-//       // {
-//       //   $unset: "calResultGroup.data",
-//       // },
-//       // {
-//       //   $project: {
-//       //     date: "$date",
-//       //     CW: "$CW",
-//       //     calResultGroup: "$calResultGroup",
-//       //     month: "$month",
-//       //   },
-//       // },
-//       {
-//         $replaceRoot: { newRoot: { $mergeObjects: ["$calResultGroup", "$$ROOT"] } },
-//       },
-//       {
-//         $unset: "calResultGroup",
-//       },
-//       // {
-//       //   $replaceRoot: { newRoot: { $mergeObjects: ["$data", "$$ROOT"] } },
-//       // },
-//       {
-//         $unset: "data",
-//       },
-//       {
-//         $replaceRoot: { newRoot: { $mergeObjects: ["$groupData", "$$ROOT"] } },
-//       },
-//       {
-//         $unset: "groupData",
-//       },
-//       {
-//         $unset: "yieldData",
-//       },
-//       // { $project: { calResultGroup: 0 } },
-//     ]);
-//     res.json(usersQuery);
-//   } catch (error) {
-//     console.log("🚀 ~ error:", error);
-//     res.sendStatus(500);
-//   }
-// });
-// router.get("/noGroup", apicache.middleware("10 minutes"), async (req, res, next) => {
-//   try {
-//     req.apicacheGroup = cacheStr;
-//     const usersQuery = await CALCULATE.aggregate([
-//       { $match: {} },
-//       {
-//         $unset: "calResultGroup",
-//       },
-//       {
-//         $unwind: "$calResultNoGroup",
-//       },
-//       // {
-//       //   $unset: "calResultGroup.data",
-//       // },
-//       // {
-//       //   $project: {
-//       //     date: "$date",
-//       //     CW: "$CW",
-//       //     calResultGroup: "$calResultGroup",
-//       //     month: "$month",
-//       //   },
-//       // },
-//       {
-//         $replaceRoot: { newRoot: { $mergeObjects: ["$calResultNoGroup", "$$ROOT"] } },
-//       },
-//       {
-//         $unset: "calResultNoGroup",
-//       },
-//       // { $project: { calResultGroup: 0 } },
-//     ]);
-//     res.json(usersQuery);
-//   } catch (error) {
-//     console.log("🚀 ~ error:", error);
-//     res.sendStatus(500);
-//   }
-// });
+
 router.get("/lastCalWeek", async (req, res, next) => {
   try {
     const nextFriday = moment().day("Friday").startOf("day").toDate();
@@ -218,5 +133,166 @@ router.post("/create", async (req, res, next) => {
     res.sendStatus(500);
   }
 });
+
+router.get("/cal", async (req, res, next) => {
+  try {
+    apicache.clear(cacheStr);
+    apicache.clear(cacheStr2);
+    const { date } = req.query;
+    let groupTargetAll = await GROUP_TARGET.aggregate([
+      {
+        $match: {},
+      },
+    ]);
+    const models = groupTargetAll.map((a) => a.model);
+    const resYield_models = await axios.get("http://10.200.90.152:4042/models");
+    const yield_models = resYield_models.data;
+
+    let modelsStr = JSON.stringify(models);
+    const nextFriday = moment(date).day("Friday");
+    const lastSaturday = moment(nextFriday).subtract(6, "day");
+    let sd = moment(lastSaturday).startOf("day").format("YYYY-MM-DD");
+    let ed = moment(nextFriday).endOf("day").format("YYYY-MM-DD");
+    const resYield_data = await axios.get("http://10.200.90.152:4042/dataDaily", {
+      params: {
+        start: sd,
+        end: ed,
+        model: modelsStr,
+      },
+    });
+    const yield_data = resYield_data.data;
+    const dataModels = groupTargetAll.map((a) => {
+      const item1 = yield_models.find((b) => b.model == a.model);
+      const item2 = yield_data.filter((b) => b.modelNo == a.model);
+      //   console.log("🚀 ~ item2:", item2);
+      //   return { a, item1, item2 };
+      return {
+        ...a,
+        ...item1,
+        yield: item2,
+      };
+    });
+    const ngRef = await NG_REF.aggregate([{ $match: {} }]);
+    const calendar = await CALENDAR.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: moment(ed).startOf("day").toDate(),
+            $lte: moment(ed).endOf("day").toDate(),
+          },
+        },
+      },
+      {
+        $project: {
+          date: "$date",
+          month: "$month",
+          CW: "$CW",
+        },
+      },
+    ]);
+    console.log("🚀 ~ calendar:", calendar);
+    const weekData = calendar && calendar.length > 0 ? calendar[0] : null;
+    weekData ? delete weekData._id : false;
+    const foo = _cal_normal_fn.calculate(ngRef, dataModels, weekData);
+    const deleteItems = foo.map((a) => {
+      return { deleteMany: { filter: { CW: a.CW } } };
+    });
+    const resultDelete = await CALCULATE.bulkWrite(deleteItems);
+    console.log("🚀 ~ resultDelete:", resultDelete);
+    const foo2 = await CALCULATE.insertMany(foo);
+    res.json(foo2);
+  } catch (error) {
+    console.log("🚀 ~ error:", error);
+  }
+});
+
+router.get("/calAll", async (req, res, next) => {
+  try {
+    apicache.clear(cacheStr);
+    apicache.clear(cacheStr2);
+    let thursdays = findAllThursday();
+    let result = [];
+    for (let i = 0; i < thursdays.length; i++) {
+      const thursday = thursdays[i];
+      let groupTargetAll = await GROUP_TARGET.aggregate([
+        {
+          $match: {},
+        },
+      ]);
+      const models = groupTargetAll.map((a) => a.model);
+      const resYield_models = await axios.get("http://10.200.90.152:4042/models");
+      const yield_models = resYield_models.data;
+
+      let modelsStr = JSON.stringify(models);
+      const nextFriday = moment(thursday).day("Friday");
+      const lastSaturday = moment(nextFriday).subtract(6, "day");
+      let sd = moment(lastSaturday).startOf("day").format("YYYY-MM-DD");
+      let ed = moment(nextFriday).endOf("day").format("YYYY-MM-DD");
+      const resYield_data = await axios.get("http://10.200.90.152:4042/dataDaily", {
+        params: {
+          start: sd,
+          end: ed,
+          model: modelsStr,
+        },
+      });
+      const yield_data = resYield_data.data;
+      const dataModels = groupTargetAll.map((a) => {
+        const item1 = yield_models.find((b) => b.model == a.model);
+        const item2 = yield_data.filter((b) => b.modelNo == a.model);
+        return {
+          ...a,
+          ...item1,
+          yield: item2,
+        };
+      });
+      const ngRef = await NG_REF.aggregate([{ $match: {} }]);
+      const calendar = await CALENDAR.aggregate([
+        {
+          $match: {
+            date: {
+              $gte: moment(ed).startOf("day").toDate(),
+              $lte: moment(ed).endOf("day").toDate(),
+            },
+          },
+        },
+        {
+          $project: {
+            date: "$date",
+            month: "$month",
+            CW: "$CW",
+          },
+        },
+      ]);
+      const weekData = calendar && calendar.length > 0 ? calendar[0] : null;
+      weekData ? delete weekData._id : false;
+      const foo = _cal_normal_fn.calculate(ngRef, dataModels, weekData);
+      const deleteItems = foo.map((a) => {
+        return { deleteMany: { filter: { CW: a.CW } } };
+      });
+      const resultDelete = await CALCULATE.bulkWrite(deleteItems);
+      const foo2 = await CALCULATE.insertMany(foo);
+      result.push(foo2);
+      if (i + 1 === thursdays.length) {
+        res.json(result);
+      }
+    }
+  } catch (error) {
+    console.log("🚀 ~ error:", error);
+  }
+});
+findAllThursday();
+function findAllThursday() {
+  const startDate = moment("2023-09-01");
+  const endDate = moment(); // ใช้วันที่ปัจจุบัน
+  const thursdays = [];
+  while (startDate.isSameOrBefore(endDate, "day")) {
+    if (startDate.day() === 4) {
+      // 4 คือวันพฤหัส
+      thursdays.push(startDate.format("YYYY-MM-DD"));
+    }
+    startDate.add(1, "day");
+  }
+  return thursdays;
+}
 
 module.exports = router;

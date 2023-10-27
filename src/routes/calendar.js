@@ -1,15 +1,15 @@
 let express = require("express");
 let router = express.Router();
 const apicache = require("apicache-plus");
-let cache = apicache.middleware
+let cache = apicache.middleware;
 let XLSX = require("xlsx");
 const CALENDAR = require("../models/calendar");
 const cacheStr = "calendar";
 
-router.get("/", apicache.middleware("10 minutes"),async (req, res, next) => {
+router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
   try {
-    req.apicacheGroup  = cacheStr
-    const usersQuery = await CALENDAR.aggregate([{$match:{}}])
+    req.apicacheGroup = cacheStr;
+    const usersQuery = await CALENDAR.aggregate([{ $match: {} }]).sort({ date: -1 });
     res.json(usersQuery);
   } catch (error) {
     res.sendStatus(500);
@@ -18,12 +18,9 @@ router.get("/", apicache.middleware("10 minutes"),async (req, res, next) => {
 
 router.get("/download", async (req, res, next) => {
   try {
-    
     const data = await CALENDAR.aggregate([
       {
-        $match: {
-          
-        },
+        $match: {},
       },
       {
         $unset: ["_id", "createdAt", "updatedAt"],
@@ -46,11 +43,11 @@ router.get("/download", async (req, res, next) => {
 });
 router.post("/create", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr)
-    const statusDelete = await CALENDAR.deleteMany({})
-    console.log("delete group target", statusDelete)
-    const usersQuery = await CALENDAR.insertMany(req.body)
-    console.log('create group target ->',usersQuery.length);
+    apicache.clear(cacheStr);
+    const statusDelete = await CALENDAR.deleteMany({});
+    console.log("delete group target", statusDelete);
+    const usersQuery = await CALENDAR.insertMany(req.body);
+    console.log("create group target ->", usersQuery.length);
     res.json(usersQuery);
   } catch (error) {
     res.sendStatus(500);

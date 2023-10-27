@@ -11,7 +11,7 @@ const moment = require("moment/moment");
 const cacheStr = "calculate";
 const CALENDAR = require("../models/calendar");
 
-const _cal_normal_fn = require("./cal_normal_fn");
+const _cal_normal_fn = require("../services/cal_normal_fn");
 
 router.get("/", async (req, res, next) => {
   try {
