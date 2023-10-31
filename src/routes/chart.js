@@ -164,7 +164,7 @@ router.get("/1", async (req, res, next) => {
         type: "line",
         data: summarizeGroupCause(cal, CW, "targetPolaFM"),
         color: "#f9c46b",
-        yAxisIndex: 0,
+        yAxisIndex: 1,
 
         emphasis: {
           focus: "series",
@@ -231,7 +231,7 @@ router.get("/1", async (req, res, next) => {
             axisLabel: {
               formatter: "{value} %",
             },
-            max: 25,
+            max: 50,
           },
         ],
         tooltip: {
@@ -255,6 +255,9 @@ router.get("/1", async (req, res, next) => {
           },
           top: 20,
           orient: "vertical",
+        },
+        grid: {
+          containLabel: true,
         },
       };
     });
@@ -404,7 +407,7 @@ router.get("/2", async (req, res, next) => {
         type: "line",
         data: summarizeNormalCause(model, calData, CW, "targetPolaFM"),
         color: "#f9c46b",
-        yAxisIndex: 0,
+        yAxisIndex: 1,
 
         emphasis: {
           focus: "series",
@@ -494,6 +497,9 @@ router.get("/2", async (req, res, next) => {
           top: 20,
           orient: "vertical",
         },
+        grid: {
+          containLabel: true,
+        },
       };
     });
     const onlyData = ab.filter((a) => {
@@ -566,7 +572,7 @@ function foo2(group, key, CW) {
 // }
 function summarizeGroupCause(cal, CW, key) {
   return CW.map((w) => {
-    if (key == "planYield") {
+    if (key == "planYield" || key == "targetPolaFM") {
       const dataOnCW = cal.data.find((d) => d.CW == w);
       const sum = dataOnCW ? dataOnCW[key] : null;
       return sum ? Number(sum * 100).toFixed(2) : null;
