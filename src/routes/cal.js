@@ -13,6 +13,10 @@ const CALENDAR = require("../models/calendar");
 
 const _cal_normal_fn = require("../services/cal_normal_fn");
 
+router.get("/d", async (req, res, next) => {
+  res.send("ok");
+});
+
 router.get("/", async (req, res, next) => {
   try {
     const { date } = req.query;
@@ -67,6 +71,7 @@ router.get("/", async (req, res, next) => {
     res.json(foo);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 
@@ -132,6 +137,7 @@ router.get("/d1", async (req, res, next) => {
     res.json(foo2);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 

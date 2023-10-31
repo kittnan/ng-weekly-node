@@ -5,6 +5,7 @@ let app = express();
 let morgan = require("morgan");
 let mongoose = require("mongoose");
 let compression = require("compression");
+let apicache = require("apicache-plus");
 
 mongoose.set("strictQuery", false);
 
@@ -24,6 +25,8 @@ app.use(bodyParser.urlencoded({ limit: "5mb", extended: true }));
 app.use(cors());
 app.use(compression());
 
+// app.use(apicache("5 minutes"));
+
 let NG_REF = require("./src/routes/ngRef");
 app.use("/ng-ref", NG_REF);
 
@@ -36,8 +39,8 @@ app.use("/calculate", CALCULATE);
 let CALENDAR = require("./src/routes/calendar");
 app.use("/calendar", CALENDAR);
 
-let d = require("./src/routes/cal");
-app.use("/d", d);
+// let d = require("./src/routes/cal");
+// app.use("/d", d);
 
 let CHART = require("./src/routes/chart");
 app.use("/chart", CHART);

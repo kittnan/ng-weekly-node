@@ -6,12 +6,14 @@ let XLSX = require("xlsx");
 const CALENDAR = require("../models/calendar");
 const cacheStr = "calendar";
 
-router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
+router.get("/", async (req, res, next) => {
+  // router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
   try {
-    req.apicacheGroup = cacheStr;
+    // req.apicacheGroup = cacheStr;
     const usersQuery = await CALENDAR.aggregate([{ $match: {} }]).sort({ date: -1 });
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });
@@ -43,13 +45,14 @@ router.get("/download", async (req, res, next) => {
 });
 router.post("/create", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
+    // apicache.clear(cacheStr);
     const statusDelete = await CALENDAR.deleteMany({});
     console.log("delete group target", statusDelete);
     const usersQuery = await CALENDAR.insertMany(req.body);
     console.log("create group target ->", usersQuery.length);
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });

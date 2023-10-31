@@ -18,12 +18,13 @@ const _cal_normal_fn = require("../services/cal_normal_fn");
 // const $cal_group = require("./calculate_group_fn");
 // const $cal_NoGroup = require("./calculate_nogroup_fn");
 
-router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-    req.apicacheGroup = cacheStr;
+    // req.apicacheGroup = cacheStr;
     const usersQuery = await CALCULATE.aggregate([{ $match: {} }]).sort({ date: -1 });
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });
@@ -40,25 +41,6 @@ router.get("/lastCalWeek", async (req, res, next) => {
       },
     ]);
     res.json(data);
-
-    // let { date } = req.query;
-    // if (date) {
-    //   date = moment(date).startOf("day").toDate();
-    //   const nextFriday = moment().day("Friday");
-    //   console.log("วันศุกร์ถัดไป:", nextFriday.format("YYYY-MM-DD"));
-    //   const lastSaturday = moment(nextFriday).subtract(6, "day");
-    //   console.log("วันเสาร์ที่ผ่านมา:", lastSaturday.format("YYYY-MM-DD"));
-
-    //   let sd = moment(lastSaturday).startOf("day").format("YYYY-MM-DD")
-    //   let ed = moment(nextFriday).endOf('day').format("YYYY-MM-DD")
-    //   const foo =  await axios.get('http://10.200.90.152:4042/dataDaily',{
-    //     params:{
-    //       start: sd,
-    //       end:ed
-    //     }
-    //   })
-    //   res.json(foo.data);
-    // }
   } catch (error) {
     console.log("🚀 ~ error:", error);
     res.sendStatus(500);
@@ -66,7 +48,7 @@ router.get("/lastCalWeek", async (req, res, next) => {
 });
 router.get("/calculate", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
+    // apicache.clear(cacheStr);
     const { ngRef, haveGroup, notHaveGroup, weekData } = await $cal.calculate();
     const calResultGroup = await $cal_group.calculate(ngRef, haveGroup);
     const calResultNoGroup = await $cal_NoGroup.calculate(ngRef, notHaveGroup);
@@ -79,6 +61,7 @@ router.get("/calculate", async (req, res, next) => {
     res.json(resultInsertCal);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 
@@ -123,21 +106,22 @@ router.get("/download", async (req, res, next) => {
 });
 router.post("/create", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
+    // apicache.clear(cacheStr);
     const statusDelete = await CALCULATE.deleteMany({});
     console.log("delete NG ref", statusDelete);
     const usersQuery = await CALCULATE.insertMany(req.body);
     console.log("create NG ref ->", usersQuery.length);
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });
 
 router.get("/cal", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
-    apicache.clear(cacheStr2);
+    // apicache.clear(cacheStr);
+    // apicache.clear(cacheStr2);
     const { date } = req.query;
     let groupTargetAll = await GROUP_TARGET.aggregate([
       {
@@ -203,13 +187,14 @@ router.get("/cal", async (req, res, next) => {
     res.json(foo2);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 
 router.get("/calAll", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
-    apicache.clear(cacheStr2);
+    // apicache.clear(cacheStr);
+    // apicache.clear(cacheStr2);
     let thursdays = findAllThursday();
     let result = [];
     for (let i = 0; i < thursdays.length; i++) {
@@ -278,6 +263,7 @@ router.get("/calAll", async (req, res, next) => {
     }
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 findAllThursday();

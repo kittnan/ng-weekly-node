@@ -7,7 +7,7 @@ module.exports = {
       args: "start",
       env: {
         NODE_ENV: "production",
-        PORT: 4056,
+        PORT: 4047,
         DATABASE: "mongodb://10.200.90.152:27017/ng-weekly",
       },
     },

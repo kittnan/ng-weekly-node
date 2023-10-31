@@ -6,16 +6,26 @@ let XLSX = require("xlsx");
 const NG_REF = require("../models/ngRef");
 const cacheStr = "ngRef";
 
-router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
+// router.get("/", apicache.middleware("10 minutes"), async (req, res, next) => {
+//   try {
+//     req.apicacheGroup = cacheStr;
+//     const usersQuery = await NG_REF.aggregate([{ $match: {} }]);
+//     res.json(usersQuery);
+//   } catch (error) {
+//     console.log("🚀 ~ error:", error);
+//     res.sendStatus(500);
+//   }
+// });
+router.get("/", async (req, res, next) => {
   try {
-    req.apicacheGroup  = cacheStr
+    // req.apicacheGroup = cacheStr;
     const usersQuery = await NG_REF.aggregate([{ $match: {} }]);
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });
-
 
 router.get("/download", async (req, res, next) => {
   try {
@@ -58,13 +68,14 @@ router.get("/download", async (req, res, next) => {
 });
 router.post("/create", async (req, res, next) => {
   try {
-    apicache.clear(cacheStr);
+    // apicache.clear(cacheStr);
     const statusDelete = await NG_REF.deleteMany({});
     console.log("delete NG ref", statusDelete);
     const usersQuery = await NG_REF.insertMany(req.body);
     console.log("create NG ref ->", usersQuery.length);
     res.json(usersQuery);
   } catch (error) {
+    console.log("🚀 ~ error:", error);
     res.sendStatus(500);
   }
 });

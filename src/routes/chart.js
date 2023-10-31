@@ -16,7 +16,7 @@ const $cal_general = require("../services/calculate_general_fn");
 
 router.get("/1", async (req, res, next) => {
   try {
-    req.apicacheGroup = cacheStr;
+    // req.apicacheGroup = cacheStr;
     let CW = await CALENDAR.aggregate([
       {
         $match: {
@@ -262,12 +262,13 @@ router.get("/1", async (req, res, next) => {
     res.json(calData2);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 
 router.get("/2", async (req, res, next) => {
   try {
-    req.apicacheGroup = cacheStr;
+    // req.apicacheGroup = cacheStr;
     let CW = await CALENDAR.aggregate([
       {
         $match: {
@@ -508,6 +509,7 @@ router.get("/2", async (req, res, next) => {
     res.json(sortData);
   } catch (error) {
     console.log("🚀 ~ error:", error);
+    res.sendStatus(500);
   }
 });
 
