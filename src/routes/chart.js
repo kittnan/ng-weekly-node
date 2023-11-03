@@ -93,7 +93,7 @@ router.get("/1", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeGroupCause(cal, CW, "PolaFMPercent"),
-        color: "#58b368",
+        color: "#ccffcc",
         yAxisIndex: 1,
         emphasis: {
           focus: "series",
@@ -105,7 +105,7 @@ router.get("/1", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeGroupCause(cal, CW, "ProcessCausePercent"),
-        color: "#f8aa4b",
+        color: "#ffbf82",
         yAxisIndex: 1,
 
         emphasis: {
@@ -118,7 +118,7 @@ router.get("/1", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeGroupCause(cal, CW, "ArrayCausePercent"),
-        color: "#bae8e8",
+        color: "#ffccda",
         yAxisIndex: 1,
         emphasis: {
           focus: "series",
@@ -130,7 +130,7 @@ router.get("/1", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeGroupCause(cal, CW, "MaterialCausePercent"),
-        color: "#3783ae",
+        color: "#82c2ff",
         yAxisIndex: 1,
 
         emphasis: {
@@ -163,15 +163,19 @@ router.get("/1", async (req, res, next) => {
         name: "Target Pola FM",
         type: "line",
         data: summarizeGroupCause(cal, CW, "targetPolaFM"),
-        color: "#f9c46b",
+        color: "#004723",
         yAxisIndex: 1,
 
         emphasis: {
           focus: "series",
         },
       };
-
+      let legend = ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield", "Target Pola FM"];
       let data = [s1, s2, s3, s4, s5, s6, s7];
+      if (cal.type == "MDL") {
+        legend = ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield"];
+        data = [s1, s2, s3, s4, s5, s6];
+      }
 
       return {
         title: {
@@ -179,7 +183,7 @@ router.get("/1", async (req, res, next) => {
           text: cal ? `${cal.groupName} ${cal.type} Yield ` : "",
         },
         legend: {
-          data: ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield", "Target Pola FM"],
+          data: legend,
           orient: "horizontal",
           top: 10,
           padding: 20,
@@ -335,7 +339,7 @@ router.get("/2", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeNormalCause(model, calData, CW, "PolaFMPercent"),
-        color: "#58b368",
+        color: "#ccffcc",
         yAxisIndex: 1,
 
         emphasis: {
@@ -348,7 +352,7 @@ router.get("/2", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeNormalCause(model, calData, CW, "ProcessCausePercent"),
-        color: "#f8aa4b",
+        color: "#ffbf82",
         yAxisIndex: 1,
 
         emphasis: {
@@ -361,7 +365,7 @@ router.get("/2", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeNormalCause(model, calData, CW, "ArrayCausePercent"),
-        color: "#bae8e8",
+        color: "#ffccda",
         yAxisIndex: 1,
         emphasis: {
           focus: "series",
@@ -373,7 +377,7 @@ router.get("/2", async (req, res, next) => {
         type: "bar",
         stack: "stack1",
         data: summarizeNormalCause(model, calData, CW, "MaterialCausePercent"),
-        color: "#3783ae",
+        color: "#82c2ff",
         yAxisIndex: 1,
 
         emphasis: {
@@ -406,7 +410,7 @@ router.get("/2", async (req, res, next) => {
         name: "Target Pola FM",
         type: "line",
         data: summarizeNormalCause(model, calData, CW, "targetPolaFM"),
-        color: "#f9c46b",
+        color: "#004723",
         yAxisIndex: 1,
 
         emphasis: {
@@ -414,19 +418,26 @@ router.get("/2", async (req, res, next) => {
         },
       };
 
+      let legend = ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield", "Target Pola FM"];
+      let data = [s1, s2, s3, s4, s5, s6, s7];
+      if (item && item.type == "MDL") {
+        legend = ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield"];
+        data = [s1, s2, s3, s4, s5, s6];
+      }
+
       return {
         title: {
           show: true,
           text: item ? `${item.projectName} ${item.type} Yield ( ${item.model} )` : "",
         },
         legend: {
-          data: ["Mat Cause", "Array Cause", "Process Cause", "Pola FM", "ST Yield", "Plan Yield", "Target Pola FM"],
+          data: legend,
           orient: "horizontal",
           top: 10,
           padding: 20,
           itemWidth: 10,
         },
-        series: [s1, s2, s3, s4, s5, s6, s7],
+        series: data,
         xAxis: [
           {
             type: "category",
@@ -526,50 +537,7 @@ function summarizeNormalCause(model, calData, CW, key) {
     return temp ? Number(temp * 100).toFixed(2) : null;
   });
 }
-function foo2(group, key, CW) {
-  return CW.map((w) => {
-    if (key == "planYield" || key == "ST Yield") {
-      const dataOnCW = group.data.find((cal) => cal.CW == w);
-      const sum = dataOnCW ? dataOnCW[key] : null;
-      return sum ? Number(sum * 100).toFixed(2) : 0;
-    } else {
-      const dataOnCW = group.data.filter((cal) => cal.CW == w);
-      const sum = dataOnCW.reduce((p, n) => {
-        return (p += n[key]);
-      }, 0);
-      return sum ? Number(sum * 100).toFixed(2) : 0;
-    }
-  });
-}
-// function summarizeGroupCause(cal, CW, key) {
-//   return CW.map((w) => {
-//     if (key == "planYield") {
-//       const dataOnCW = cal.data.find((d) => d.CW == w);
-//       const sum = dataOnCW ? dataOnCW[key] : null;
-//       return sum ? Number(sum * 100).toFixed(2) : null;
-//     } else if (key == "ST Yield") {
-//       const dataOnCW = cal.data.filter((cal) => cal.CW == w);
-//       const input = dataOnCW.reduce((p, n) => {
-//         return (p += n["Input"]);
-//       }, 0);
-//       const output = dataOnCW.reduce((p, n) => {
-//         return (p += n["Output"]);
-//       }, 0);
-//       // const sum = dataOnCW.reduce((p, n) => {
-//       //   p += n[key];
-//       //   return p;
-//       // }, 0);
-//       const sum2 = output / input;
-//       return sum2 ? Number(sum2 * 100).toFixed(2) : null;
-//     } else {
-//       const dataOnCW = cal.data.filter((cal) => cal.CW == w);
-//       const sum = dataOnCW.reduce((p, n) => {
-//         return (p += n[key]);
-//       }, 0);
-//       return sum ? Number(sum * 100).toFixed(2) : null;
-//     }
-//   });
-// }
+
 function summarizeGroupCause(cal, CW, key) {
   return CW.map((w) => {
     if (key == "planYield" || key == "targetPolaFM") {
