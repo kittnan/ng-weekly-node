@@ -15,7 +15,7 @@ const cron = require("node-cron");
 const $cal = require("../services/calculate_fn");
 const _cal_normal_fn = require("../services/cal_normal_fn");
 
-cron.schedule("0 0 13 * 4", () => {
+cron.schedule("0 30 11 * * 4", () => {
   console.log("Task is running every Thursday at 13:00!");
   calEvery();
 });
