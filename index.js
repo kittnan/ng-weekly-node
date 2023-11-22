@@ -45,6 +45,8 @@ app.use("/calendar", CALENDAR);
 let CHART = require("./src/routes/chart");
 app.use("/chart", CHART);
 
+let AUTOMATIC = require("./src/routes/automatic");
+
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST ,PUT ,DELETE");
